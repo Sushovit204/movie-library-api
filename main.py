@@ -44,3 +44,9 @@ def create_favourite(new_movie: Movie):
     # Return a response 
     return{"data":new_movie}
 
+@app.get("/favmovies")
+def favmovies():
+    query = f"SELECT * FROM FMOVIE"
+    mycursor.execute(query)
+    rows = mycursor.fetchall()
+    return{"favmovies":rows}
