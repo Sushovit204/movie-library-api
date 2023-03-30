@@ -1,34 +1,46 @@
-from fastapi import FastAPI, Response
+from fastapi import FastAPI
 from pydantic import BaseModel
 import mysql.connector
-import json 
+
 
 app = FastAPI()
 
 #connecting to database
-db = mysql.connector.connect(
+mydb = mysql.connector.connect(
     host ="localhost",
     user ="root",
     password = "Gaming.004",
     database = "imdb_movies"
 )
 
+#Creating cursor
+mycursor = mydb.cursor()
 
-# class Movie(BaseModel):
-#     title:str
-#     watched: bool = False
+class Movie(BaseModel):
+    title:str
+    watched: bool = False
 
 @app.get("/")
 def welcome():
     return {"Welcome to my Music Library API.To view all the movies data go to /movies endpoint"}
 
 @app.get("/movies")
-def get_movies_table(response:Response):
-    cursor = db.cursor()
+def get_movies_table():
     query = f"SELECT title FROM MOVIES"
-    cursor.execute(query)
-    rows = cursor.fetchall()
+    mycursor.execute(query)
+    rows = mycursor.fetchall()
     return{"movies":rows}
 
-# @app.get("/post")
-# def creating_favourite(new_movie = Movie)
+@app.post("/postmovies")
+def create_favourite(new_movie: Movie):
+    print(new_movie.dict())
+
+    #Inserting the data in MYsql DB
+    sql = "INSERT INTO FMOVIE (title, watched) VALUES (%s, %s)"
+    val = (new_movie.title, new_movie.watched)
+    mycursor.execute(sql, val)
+    mydb.commit()
+
+    # Return a response 
+    return{"data":new_movie}
+
