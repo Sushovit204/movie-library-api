@@ -1,20 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, validator
-import mysql.connector
+from database import mydb, mycursor
 
 
 app = FastAPI()
-
-#connecting to database
-mydb = mysql.connector.connect(
-    host ="localhost",
-    user ="root",
-    password = "Gaming.004",
-    database = "imdb_movies"
-)
-
-#Creating cursor
-mycursor = mydb.cursor()
 
 class Movie(BaseModel):
     title:str
