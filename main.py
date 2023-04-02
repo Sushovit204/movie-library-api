@@ -1,24 +1,17 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, validator
+from fastapi import FastAPI, HTTPException, status
 from database import mydb, mycursor
-
+from schemas import Movies, Users
+import mysql.connector
 
 app = FastAPI()
 
-class Movie(BaseModel):
-    title:str
-    watched: bool = False
-
-    @validator('title')
-    def covert_lower_case(cls,v):
-        return v.lower()
 
 @app.get("/")
 def welcome():
     return {"Welcome to my Music Library API.To view all the movies data go to /movies endpoint"}
 
 #Gets a list of top movies
-@app.get("/movies")
+@app.get("/movies", status_code=status.HTTP_200_OK)
 def get_movies_table():
     query = "SELECT title FROM MOVIES"
     mycursor.execute(query)
@@ -26,14 +19,14 @@ def get_movies_table():
     return{"movies":rows}
 
 #Posting Favourite movie and save them to database
-@app.post("/postmovies")
-def create_favourite(new_movie: Movie):
+@app.post("/postmovies", response_model=Movies, status_code=status.HTTP_201_CREATED)
+def create_favourite(new_movie: Movies):
     print(new_movie.dict())
 
     #Retriving tittle from Movies
     query = "SELECT title FROM MOVIES "
     mycursor.execute(query)
-    exist_movie = exist_movie = [m[0] for m in mycursor.fetchall()]
+    exist_movie = [m[0] for m in mycursor.fetchall()]
 
     #Checking if the movie doesnot exist in the movie db
     if new_movie.title not in exist_movie:
@@ -67,9 +60,35 @@ def create_favourite(new_movie: Movie):
     return{"data":new_movie}
 
 #View favourite movies data
-@app.get("/favmovies")
+@app.get("/favmovies", status_code=status.HTTP_200_OK)
 def favmovies():
     query = f"SELECT * FROM FMOVIE"
     mycursor.execute(query)
     rows = mycursor.fetchall()
-    return{"favmovies":rows}
+    return{"favmovies":"rows"}
+
+#creating new users
+@app.post("/user", response_model=Users ,status_code=status.HTTP_201_CREATED)
+def create_user(user:Users):
+    try:
+        query = "INSERT INTO USERS(username, email, password) VALUES (%s,%s,%s)"
+        val = (user.username, user.email, user.password)
+        mycursor.execute(query, val)
+        mydb.commit()
+        return{"data":"User Created Successfully"}
+    except mysql.connector.IntegrityError as e:
+        #Throws error for duplicaiton of username
+        if "username" in str (e):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT,
+                                detail="Username already taken")
+        #Throws error if email already in use
+        elif "email" in str (e):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT,
+                                detail="Email already in use")
+    finally:
+        mycursor.close()
+        mydb.close()
+             
+        
+
+    
