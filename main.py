@@ -2,8 +2,11 @@ from fastapi import FastAPI, HTTPException, status
 from database import mydb, mycursor
 from schemas import Movies, Users
 import mysql.connector
+from passlib.context import CryptContext
 
 app = FastAPI()
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 @app.get("/")
@@ -68,9 +71,13 @@ def favmovies():
     return{"favmovies":"rows"}
 
 #creating new users
-@app.post("/user", response_model=Users ,status_code=status.HTTP_201_CREATED)
+@app.post("/user", status_code=status.HTTP_201_CREATED)
 def create_user(user:Users):
     try:
+        #Hashing the password
+        hashed_password = pwd_context.hash(user.password)
+        user.password = hashed_password
+
         query = "INSERT INTO USERS(username, email, password) VALUES (%s,%s,%s)"
         val = (user.username, user.email, user.password)
         mycursor.execute(query, val)

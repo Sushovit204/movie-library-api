@@ -17,11 +17,7 @@ class Users(BaseModel):
     def convert_lower(cls,v):
         return v.lower()
     
-    @validator('username')
-    def checks_spaces(cls,v):
-        if ' ' in v:
-            raise ValueError('Username should not contain spaces')
-        return v
-
     email : EmailStr
     password : str
+
+
