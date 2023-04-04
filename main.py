@@ -1,13 +1,9 @@
 from fastapi import FastAPI, HTTPException, status
 from database import mydb, mycursor
 from schemas import Movies, Users
-import mysql.connector
-from passlib.context import CryptContext
+import mysql.connector, utilis
 
 app = FastAPI()
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 
 @app.get("/")
 def welcome():
@@ -75,7 +71,7 @@ def favmovies():
 def create_user(user:Users):
     try:
         #Hashing the password
-        hashed_password = pwd_context.hash(user.password)
+        hashed_password = utilis.hash(user.password)
         user.password = hashed_password
 
         query = "INSERT INTO USERS(username, email, password) VALUES (%s,%s,%s)"
@@ -96,6 +92,13 @@ def create_user(user:Users):
         mycursor.close()
         mydb.close()
              
+
+@app.get("/user/{id}")
+def get_user(id:int):
+    query=f"SELECT * from users WHERE uid ={id}"
+    mycursor.execute(query)
+    user = mycursor.fetchone()
+    return{"user":user}
         
 
     
