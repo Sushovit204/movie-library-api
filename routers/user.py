@@ -4,10 +4,12 @@ from database import mydb, mycursor
 import utilis
 import mysql.connector
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/user"
+)
 
 #creating new users
-@router.post("/user", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED)
 def create_user(user:Users):
     try:
         #Hashing the password
@@ -32,7 +34,7 @@ def create_user(user:Users):
         mycursor.close()
         mydb.close()
 
-@router.get("/user/{id}")
+@router.get("/{id}")
 def get_user(id:int):
     query=f"SELECT uid, username, created_at from users WHERE uid ={id}"
     mycursor.execute(query)
@@ -44,7 +46,7 @@ def get_user(id:int):
         return{"user":user}
     
 #deleting user by id
-@router.delete("/user/{id}")
+@router.delete("/{id}")
 def delete_user(id:int):
     query = f"DELETE FROM USERS WHERE uid = {id}"
     mycursor.execute(query)

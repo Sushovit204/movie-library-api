@@ -2,18 +2,12 @@ from schemas import Movies
 from fastapi import HTTPException, status, APIRouter
 from database import mydb, mycursor
 
-router = APIRouter()
-
-#Gets a list of top movies
-@router.get("/movies", status_code=status.HTTP_200_OK)
-def get_movies_table():
-    query = "SELECT title FROM MOVIES"
-    mycursor.execute(query)
-    rows = mycursor.fetchall()
-    return{"movies":rows}
+router = APIRouter(
+    prefix="/fmovies"
+)
 
 #Posting Favourite movie and save them to database
-@router.post("/fmovies", response_model=Movies, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=Movies, status_code=status.HTTP_201_CREATED)
 def create_favourite(new_movie: Movies):
     print(new_movie.dict())
 
@@ -54,7 +48,7 @@ def create_favourite(new_movie: Movies):
     return{"data":new_movie}
 
 #View favourite movies data
-@router.get("/fmovies", status_code=status.HTTP_200_OK)
+@router.get("/", status_code=status.HTTP_200_OK)
 def favmovies():
     query = f"SELECT * FROM FMOVIES"
     mycursor.execute(query)
@@ -62,7 +56,7 @@ def favmovies():
     return{"favmovies":rows}
 
 #deleting favourite movies
-@router.delete("/fmovies/{id}")
+@router.delete("/{id}")
 def delete_favmovie(id:int):
     query = f"DELETE FROM FMOVIES WHERE fid = {id}"
     mycursor.execute(query)
