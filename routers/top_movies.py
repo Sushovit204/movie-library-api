@@ -6,7 +6,7 @@ router= APIRouter(
 )
 
 #Gets a list of top movies
-@router.get("/movies", status_code=status.HTTP_200_OK)
+@router.get("/", status_code=status.HTTP_200_OK)
 def get_movies_table():
     query = "SELECT title FROM MOVIES"
     mycursor.execute(query)
