@@ -95,10 +95,16 @@ def create_user(user:Users):
 
 @app.get("/user/{id}")
 def get_user(id:int):
-    query=f"SELECT * from users WHERE uid ={id}"
+    query=f"SELECT uid, username, created_at from users WHERE uid ={id}"
     mycursor.execute(query)
     user = mycursor.fetchone()
-    return{"user":user}
-        
+    if mycursor.rowcount == 0:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail="Id not found in database.")
+    else:
+        return{"user":user}
+
+     
+    
 
     
