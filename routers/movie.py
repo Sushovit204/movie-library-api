@@ -13,7 +13,7 @@ def get_movies_table():
     return{"movies":rows}
 
 #Posting Favourite movie and save them to database
-@router.post("/postmovies", response_model=Movies, status_code=status.HTTP_201_CREATED)
+@router.post("/fmovies", response_model=Movies, status_code=status.HTTP_201_CREATED)
 def create_favourite(new_movie: Movies):
     print(new_movie.dict())
 
@@ -27,7 +27,7 @@ def create_favourite(new_movie: Movies):
         raise HTTPException(status_code=404, detail="Movie not found in Movies database")
 
     #Retriving tittle from FMovies
-    query = "SELECT * FROM FMOVIE WHERE title = %s"
+    query = "SELECT * FROM FMOVIES WHERE title = %s"
     val = (new_movie.title,)
     mycursor.execute(query, val)
     existing_movie = mycursor.fetchone()
@@ -38,14 +38,14 @@ def create_favourite(new_movie: Movies):
 
     #Checking if existing movie has different watched status
     if existing_movie:
-        query = "UPDATE FMOVIE SET watched =%s WHERE fid =%s"
+        query = "UPDATE FMOVIES SET watched =%s WHERE fid =%s"
         val = (new_movie.watched, existing_movie[0])
         mycursor.execute(query,val)
         mydb.commit()
         return {"data": new_movie}
 
     #If movie doesnot exist, inserting the data in MYsql DB
-    query = "INSERT INTO FMOVIE (title, watched) VALUES (%s, %s)"
+    query = "INSERT INTO FMOVIES (title, watched) VALUES (%s, %s)"
     val = (new_movie.title, new_movie.watched)
     mycursor.execute(query, val)
     mydb.commit()
@@ -54,10 +54,20 @@ def create_favourite(new_movie: Movies):
     return{"data":new_movie}
 
 #View favourite movies data
-@router.get("/favmovies", status_code=status.HTTP_200_OK)
+@router.get("/fmovies", status_code=status.HTTP_200_OK)
 def favmovies():
-    query = f"SELECT * FROM FMOVIE"
+    query = f"SELECT * FROM FMOVIES"
     mycursor.execute(query)
     rows = mycursor.fetchall()
     return{"favmovies":rows}
+
+#deleting favourite movies
+@router.delete("/fmovies/{id}")
+def delete_favmovie(id:int):
+    query = f"DELETE FROM FMOVIES WHERE fid = {id}"
+    mycursor.execute(query)
+    if mycursor.rowcount == 0:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"Favourite movie of ID{id} doesnot exist in database")
+    return {"message":f"Favourite movie of ID {id} was deleted"}
 

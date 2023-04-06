@@ -42,3 +42,13 @@ def get_user(id:int):
                             detail="Id not found in database.")
     else:
         return{"user":user}
+    
+#deleting user by id
+@router.delete("/user/{id}")
+def delete_user(id:int):
+    query = f"DELETE FROM USERS WHERE uid = {id}"
+    mycursor.execute(query)
+    if mycursor.rowcount == 0:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"User ID{id} doesnot exist in database")
+    return {"message":f"User of ID {id} was deleted"}
