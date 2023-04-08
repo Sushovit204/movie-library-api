@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
-import database, schemas, utilis
-from database import mydb, mycursor
+import schemas, utilis, oauth2
+from database import mycursor
 
 router = APIRouter(
     tags=['Authentication']
@@ -18,4 +18,6 @@ def login(user_credential:schemas.UserLogin):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail="Invalid Password.")
     
-    return{"token":"example token"}
+    access_token = oauth2.create_access_token(data={"user":user_name[0]})
+    
+    return{"access_token":access_token}
