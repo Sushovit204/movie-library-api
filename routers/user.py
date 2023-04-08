@@ -5,7 +5,8 @@ import utilis
 import mysql.connector
 
 router = APIRouter(
-    prefix="/user"
+    prefix="/user",
+    tags=["Users"]
 )
 
 #creating new users

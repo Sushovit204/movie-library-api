@@ -1,5 +1,5 @@
-from fastapi import FastAPI, HTTPException, status
-from routers import movie, user
+from fastapi import FastAPI
+from routers import movie, user, auth
 
 app = FastAPI()
 
@@ -9,6 +9,7 @@ def welcome():
 
 app.include_router(movie.router)
 app.include_router(user.router)
+app.include_router(auth.router)
 
 
     

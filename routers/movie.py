@@ -3,7 +3,8 @@ from fastapi import HTTPException, status, APIRouter
 from database import mydb, mycursor
 
 router = APIRouter(
-    prefix="/fmovies"
+    prefix="/fmovies",
+    tags=["Movies"]
 )
 
 #Posting Favourite movie and save them to database
