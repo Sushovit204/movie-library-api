@@ -1,6 +1,7 @@
 from schemas import Movies
-from fastapi import HTTPException, status, APIRouter
+from fastapi import HTTPException, status, APIRouter, Depends
 from database import mydb, mycursor
+import oauth2
 
 router = APIRouter(
     prefix="/fmovies",
@@ -9,8 +10,9 @@ router = APIRouter(
 
 #Posting Favourite movie and save them to database
 @router.post("/", response_model=Movies, status_code=status.HTTP_201_CREATED)
-def create_favourite(new_movie: Movies):
+def create_favourite(new_movie: Movies, user_id : int = Depends(oauth2.get_current_user)):
     print(new_movie.dict())
+    print(user_id)
 
     #Retriving tittle from Movies
     query = "SELECT title FROM MOVIES "
