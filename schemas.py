@@ -20,13 +20,6 @@ class Users(BaseModel):
     email : EmailStr
     password : str
 
-class UserLogin(BaseModel):
-    username: str
 
-    @validator('username')
-    def convert_lower(cls,v):
-        return v.lower()
-    
-    password: str
 
 

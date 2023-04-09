@@ -1,5 +1,4 @@
 from passlib.context import CryptContext
-from routers import user
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def hash(password: str):
