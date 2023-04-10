@@ -5,11 +5,11 @@ import oauth2
 
 router = APIRouter(
     prefix="/fmovies",
-    tags=["Movies"]
+    tags=["Favourite Movies"]
 )
 
 #Posting Favourite movie and save them to database
-@router.post("/", response_model=Movies, status_code=status.HTTP_201_CREATED)
+@router.post("/",status_code=status.HTTP_201_CREATED)
 def create_favourite(new_movie: Movies, user_id : int = Depends(oauth2.get_current_user)):
     print(new_movie.dict())
     print(user_id)
@@ -48,7 +48,7 @@ def create_favourite(new_movie: Movies, user_id : int = Depends(oauth2.get_curre
     mydb.commit()
 
     # Return a response 
-    return{"data":new_movie}
+    return{"title": new_movie.title, "watched": new_movie.watched}
 
 #View favourite movies data
 @router.get("/", status_code=status.HTTP_200_OK)
