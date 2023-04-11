@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Depends
-import utilis, oauth2
+import utilis, oauth2, schemas
 from fastapi.security.oauth2 import OAuth2PasswordRequestForm
 from database import mycursor
 
@@ -7,7 +7,7 @@ router = APIRouter(
     tags=['Authentication']
 )
 
-@router.post('/login')
+@router.post('/login', response_model=schemas.Token)
 def login(user_credential:OAuth2PasswordRequestForm = Depends()):
     query = f"SELECT * FROM users WHERE username ='{user_credential.username}'"
     mycursor.execute(query)

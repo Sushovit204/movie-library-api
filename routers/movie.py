@@ -11,8 +11,6 @@ router = APIRouter(
 #Posting Favourite movie and save them to database
 @router.post("/",status_code=status.HTTP_201_CREATED)
 def create_favourite(new_movie: Movies, user_id : int = Depends(oauth2.get_current_user)):
-    print(new_movie.dict())
-    print(user_id)
 
     #Retriving tittle from Movies
     query = "SELECT title FROM MOVIES "
@@ -60,9 +58,10 @@ def favmovies():
 
 #deleting favourite movies
 @router.delete("/{id}")
-def delete_favmovie(id:int):
+def delete_favmovie(id:int, user_id : int = Depends(oauth2.get_current_user)):
     query = f"DELETE FROM FMOVIES WHERE fid = {id}"
     mycursor.execute(query)
+    mydb.commit()
     if mycursor.rowcount == 0:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Favourite movie of ID{id} doesnot exist in database")
