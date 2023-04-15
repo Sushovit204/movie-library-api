@@ -40,13 +40,13 @@ def create_favourite(new_movie: Movies, user_id : int = Depends(oauth2.get_curre
         return {"data": new_movie}
 
     #If movie doesnot exist, inserting the data in MYsql DB
-    query = "INSERT INTO FMOVIES (title, watched) VALUES (%s, %s)"
-    val = (new_movie.title, new_movie.watched)
+    query = "INSERT INTO FMOVIES (title, watched, uid) VALUES (%s, %s, %s)"
+    val = (new_movie.title, new_movie.watched, user_id)
     mycursor.execute(query, val)
     mydb.commit()
 
     # Return a response 
-    return{"title": new_movie.title, "watched": new_movie.watched}
+    return{"title": new_movie.title, "watched": new_movie.watched, "user id": user_id}
 
 #View favourite movies data
 @router.get("/", status_code=status.HTTP_200_OK)
