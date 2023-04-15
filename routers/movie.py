@@ -41,12 +41,12 @@ def create_favourite(new_movie: Movies, user_id : int = Depends(oauth2.get_curre
 
     #If movie doesnot exist, inserting the data in MYsql DB
     query = "INSERT INTO FMOVIES (title, watched, uid) VALUES (%s, %s, %s)"
-    val = (new_movie.title, new_movie.watched, user_id)
+    val = (new_movie.title, new_movie.watched, user_id.id )
     mycursor.execute(query, val)
     mydb.commit()
 
     # Return a response 
-    return{"title": new_movie.title, "watched": new_movie.watched, "user id": user_id}
+    return{"title": new_movie.title, "watched": new_movie.watched}
 
 #View favourite movies data
 @router.get("/", status_code=status.HTTP_200_OK)
@@ -59,7 +59,7 @@ def favmovies():
 #deleting favourite movies
 @router.delete("/{id}")
 def delete_favmovie(id:int, user_id : int = Depends(oauth2.get_current_user)):
-    query = f"DELETE FROM FMOVIES WHERE fid = {id}"
+    query = f"DELETE FROM FMOVIES WHERE fid = {id} AND uid = {user_id.id}"
     mycursor.execute(query)
     mydb.commit()
     if mycursor.rowcount == 0:
