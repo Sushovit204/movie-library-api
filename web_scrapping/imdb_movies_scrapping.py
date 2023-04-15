@@ -4,16 +4,19 @@ import mysql.connector
 
 # Connect to MySQL database
 mydb = mysql.connector.connect(
-  host="localhost",
-  user="root",
-  password="Gaming.004",
-  database="imdb_movies"
+  host="Your DB_Host name",
+  user="Your db_username",
+  password="Your db_passoword",
+  database="Your db_name"
 )
 
 mycursor = mydb.cursor()
 
 # Create table to store movie data
 mycursor.execute("CREATE TABLE IF NOT EXISTS movies (id INT AUTO_INCREMENT PRIMARY KEY, title VARCHAR(255), year VARCHAR(4), rating FLOAT)")
+mycursor.execute("CREATE TABLE IF NOT EXISTS fmovies (fid INT AUTO_INCREMENT PRIMARY KEY, title VARCHAR(100), watched TINYINT(1))")
+mycursor.execute("CREATE TABLE IF NOT EXISTS users (uid INT AUTO_INCREMENT PRIMARY KEY, username VARCHAR(50), email VARCHAR(100), password VARCHAR(100), created_at DATETIME)")
+
 
 url = 'https://www.imdb.com/chart/top/?sort=ir,desc&mode=simple&page=1'
 response = requests.get(url)
