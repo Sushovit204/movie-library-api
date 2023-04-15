@@ -59,11 +59,20 @@ def favmovies():
 #deleting favourite movies
 @router.delete("/{id}")
 def delete_favmovie(id:int, user_id : int = Depends(oauth2.get_current_user)):
-    query = f"DELETE FROM FMOVIES WHERE fid = {id} AND uid = {user_id.id}"
+    query = f"SELECT uid FROM FMOVIES WHERE fid = {id}"
     mycursor.execute(query)
-    mydb.commit()
-    if mycursor.rowcount == 0:
+    result = mycursor.fetchone()
+    if result is not None:
+        uid = result[0]
+    else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"Favourite movie of ID{id} doesnot exist in database")
-    return {"message":f"Favourite movie of ID {id} was deleted"}
+                            detail=f"Favourite movie of ID {id} doesnot exist in your database ")
+    # return(f"uid: {uid}, user_id.id: {user_id.id}")
+    if int(uid) != int(user_id.id):
+         return {"message": f"Favourite movie of ID {id} does not belong to uid {user_id.id}"}
 
+    dquery=f"DELETE FROM FMOVIES WHERE fid= {id}"
+    mycursor.execute(dquery)
+    mydb.commit()
+    return {"message":f"Favourite movie of ID {id} was deleted"}
+       
