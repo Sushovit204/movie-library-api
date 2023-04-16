@@ -34,24 +34,4 @@ def create_user(user:Users):
     finally:
         mycursor.close()
         mydb.close()
-
-@router.get("/{id}")
-def get_user(id:int):
-    query=f"SELECT uid, username, created_at from users WHERE uid ={id}"
-    mycursor.execute(query)
-    user = mycursor.fetchone()
-    if mycursor.rowcount == 0:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail="Id not found in database.")
-    else:
-        return{"user":user}
     
-#deleting user by id
-@router.delete("/{id}")
-def delete_user(id:int):
-    query = f"DELETE FROM USERS WHERE uid = {id}"
-    mycursor.execute(query)
-    if mycursor.rowcount == 0:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"User ID{id} doesnot exist in database")
-    return {"message":f"User of ID {id} was deleted"}
