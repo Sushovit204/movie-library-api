@@ -10,6 +10,3 @@ def welcome():
 app.include_router(movie.router)
 app.include_router(user.router)
 app.include_router(auth.router)
-
-
-    

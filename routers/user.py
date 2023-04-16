@@ -34,4 +34,3 @@ def create_user(user:Users):
     finally:
         mycursor.close()
         mydb.close()
-    

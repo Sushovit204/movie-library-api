@@ -1,4 +1,4 @@
-import mysql.connector, os
+import os
 from dotenv import load_dotenv
 from mysql.connector import Error, connect
 
