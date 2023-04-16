@@ -1,4 +1,4 @@
-from schemas import Movies
+from schemas import Movies, UpdateFmovie
 from fastapi import HTTPException, status, APIRouter, Depends
 from database import mydb, mycursor
 import oauth2
@@ -19,34 +19,26 @@ def create_favourite(new_movie: Movies, user_id : int = Depends(oauth2.get_curre
 
     #Checking if the movie doesnot exist in the movie db
     if new_movie.title not in exist_movie:
-        raise HTTPException(status_code=404, detail="Movie not found in Movies database")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movie not found in Movies database")
 
-    #Retriving tittle from FMovies
-    query = "SELECT * FROM FMOVIES WHERE title = %s"
-    val = (new_movie.title,)
-    mycursor.execute(query, val)
+    #Retriving tittle from FMovies of uid
+    query= f"SELECT * FROM FMOVIES WHERE title = '{new_movie.title}' AND uid = {user_id.id}"
+    mycursor.execute(query)
     existing_movie = mycursor.fetchone()
 
     #Checking if the movie already exits 
-    if existing_movie and existing_movie[2] == new_movie.watched:
-        raise HTTPException(status_code=406, detail="Movie already exist in Favourite database")
-
-    #Checking if existing movie has different watched status
-    if existing_movie:
-        query = "UPDATE FMOVIES SET watched =%s WHERE fid =%s"
-        val = (new_movie.watched, existing_movie[0])
-        mycursor.execute(query,val)
+    if existing_movie is None:
+        #If movie doesnot exist, inserting the data in MYsql DB
+        query = "INSERT INTO FMOVIES (title, watched, uid) VALUES (%s, %s, %s)"
+        val = (new_movie.title, new_movie.watched, user_id.id )
+        mycursor.execute(query, val)
         mydb.commit()
-        return {"data": new_movie}
 
-    #If movie doesnot exist, inserting the data in MYsql DB
-    query = "INSERT INTO FMOVIES (title, watched, uid) VALUES (%s, %s, %s)"
-    val = (new_movie.title, new_movie.watched, user_id.id )
-    mycursor.execute(query, val)
-    mydb.commit()
-
-    # Return a response 
-    return{"title": new_movie.title, "watched": new_movie.watched}
+         # Return a response 
+        return{"title": new_movie.title, "watched": new_movie.watched}
+    else:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, 
+                            detail="Movie already exist in Favourite database")
 
 #View favourite movies data
 @router.get("/", status_code=status.HTTP_200_OK)
@@ -67,12 +59,37 @@ def delete_favmovie(id:int, user_id : int = Depends(oauth2.get_current_user)):
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Favourite movie of ID {id} doesnot exist in your database ")
-    # return(f"uid: {uid}, user_id.id: {user_id.id}")
+
     if int(uid) != int(user_id.id):
-         return {"message": f"Favourite movie of ID {id} does not belong to uid {user_id.id}"}
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail=f"Favourite movie of ID {id} does not belong to uid {user_id.id}") 
 
     dquery=f"DELETE FROM FMOVIES WHERE fid= {id}"
     mycursor.execute(dquery)
     mydb.commit()
     return {"message":f"Favourite movie of ID {id} was deleted"}
-       
+
+#Updating the fmovie 
+@router.put("/{id}")
+def update_favmovie(id: int, new_movie: UpdateFmovie, user_id: int = Depends(oauth2.get_current_user)):
+    # retrieve the Favourite movie
+    query = f"SELECT uid, watched FROM FMOVIES WHERE fid = {id}"
+    mycursor.execute(query)
+    existing_movie = mycursor.fetchone()
+
+    # check if Favourite movie exists
+    if existing_movie is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Favourite movie of ID {id} does not exist in your database")
+
+    # check if the Favourite movie belongs to the user
+    if int(existing_movie[0]) != int(user_id.id):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Favourite movie of ID {id} does not belong to uid {user_id.id}")
+
+
+    # update the watched status of the Favourite movie
+    query = "UPDATE FMOVIES SET watched = %s WHERE fid = %s"
+    val = (new_movie.watched, id)
+    mycursor.execute(query, val)
+    mydb.commit()
+
+    return {"message": f"Favourite movie of ID {id} was updated"}

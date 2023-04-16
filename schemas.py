@@ -28,4 +28,5 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     id: Optional[str] = None
 
-
+class UpdateFmovie(BaseModel):
+    watched: bool = False
